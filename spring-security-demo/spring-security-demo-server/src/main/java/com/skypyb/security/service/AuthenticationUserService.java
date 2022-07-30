@@ -2,27 +2,24 @@ package com.skypyb.security.service;
 
 import com.skypyb.security.exception.SecurityAuthException;
 import com.skypyb.security.model.dto.AuthenticationUser;
-import com.skypyb.user.model.dto.MinimumPermissionDTO;
 import com.skypyb.user.model.dto.MinimumRoleDTO;
 import com.skypyb.user.model.dto.MinimumUserDTO;
 import com.skypyb.user.service.UserService;
-import com.zaxxer.hikari.util.FastList;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class AuthenticationUserService implements UserDetailsService {
 
-    @Autowired
+    @Resource
     private UserService userService;
 
     /**
@@ -40,7 +37,6 @@ public class AuthenticationUserService implements UserDetailsService {
                 .orElseThrow(() -> new SecurityAuthException("User not found!"));
 
         List<MinimumRoleDTO> roles = userService.findUserMinimumRole(user.getUserId());
-
 
         ArrayList<SimpleGrantedAuthority> authorities = roles
                 .stream()

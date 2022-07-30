@@ -1,16 +1,14 @@
 package com.skypyb.security.config;
 
 
-import com.skypyb.security.filter.AuthenticationFailEntryPoint;
+import com.skypyb.security.filter.AuthenticationFailedEntryPoint;
 import com.skypyb.security.filter.access.JwtAuthenticationTokenFilter;
 import com.skypyb.security.filter.authentication.CreateAuthenticationTokenFilter;
 import com.skypyb.security.filter.authentication.OptionsRequestFilter;
 import com.skypyb.security.service.AuthenticationUserService;
 import com.skypyb.security.util.JwtTokenUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,10 +16,8 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.header.Header;
 import org.springframework.security.web.header.writers.StaticHeadersWriter;
@@ -30,54 +26,44 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import javax.annotation.Resource;
 import java.util.Arrays;
 
-/**
- * Web 安全配置类
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    @Autowired
+    @Resource
     private AuthenticationUserService authenticationUserService;
 
-    @Autowired
+    @Resource
     private SecurityProperties securityProperties;
 
-
     @Override
-    public void configure(WebSecurity web) throws Exception {
-
+    public void configure(WebSecurity web) {
         //允许匿名访问指定的url
-        SecurityProperties.Ignore ignore = this.securityProperties.getIgnore();
+        SecurityProperties.Ignore ignore = securityProperties.getIgnore();
         ignore.asMap().entrySet().stream()
                 .filter(entry -> !CollectionUtils.isEmpty(entry.getValue()))
-                .forEach(entry ->
-                        web.ignoring().antMatchers(
-                                entry.getKey(),
-                                entry.getValue().toArray(new String[entry.getValue().size()])
-                        )
-                );
+                .forEach(entry -> web.ignoring().antMatchers(entry.getKey(), entry.getValue().toArray(new String[entry.getValue().size()])));
     }
 
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         //主要就是设置 UserDetailsService,会用设置的 BCryptPasswordEncoder 来进行加密比对
-        auth.userDetailsService(authenticationUserService)
-                .passwordEncoder(passwordEncoderBean());
+        auth.userDetailsService(authenticationUserService).passwordEncoder(passwordEncoderBean());
     }
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeRequests()
-                .anyRequest().authenticated()  //默认请求都需要认证，这里一定要添加
+                .anyRequest().authenticated()
                 .and()
-                .csrf().disable()  //CRSF禁用，因为不使用session
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)  //禁用session
-                .and().formLogin().disable();//禁用form登录
-
+                .csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .formLogin().disable();
 
         final Header[] headers = new Header[]{
                 //支持所有源的访问
@@ -96,8 +82,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .addFilterAfter(new OptionsRequestFilter(), CorsFilter.class);
 
         //设置入口点异常处理
-        httpSecurity.exceptionHandling().authenticationEntryPoint(new AuthenticationFailEntryPoint());
-
+        httpSecurity.exceptionHandling().authenticationEntryPoint(new AuthenticationFailedEntryPoint());
 
         createAuthenticationTokenFilter(httpSecurity);
         createJwtTokenFilterInit(httpSecurity);
@@ -129,7 +114,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .addFilterAfter(authenticationTokenFilter, LogoutFilter.class);
     }
 
-
     //跨域设置
     @Bean
     public CorsFilter corsFilter() {
@@ -154,7 +138,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public JwtTokenUtil jwtTokenUtil() {
         return new JwtTokenUtil(securityProperties.getSigningKey(), securityProperties.getTokenExpiration());
     }
-
 
     /**
      * AuthenticationManager:

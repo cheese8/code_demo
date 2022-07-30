@@ -5,7 +5,6 @@ import com.skypyb.user.model.dto.MinimumRoleDTO;
 import com.skypyb.user.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.web.FilterInvocation;
@@ -16,8 +15,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -28,7 +33,7 @@ import java.util.stream.Collectors;
 public class JwtInvocationSecurityMetadataSourceService
         implements FilterInvocationSecurityMetadataSource {
 
-    private static Logger logger = LoggerFactory.getLogger("SECURITY");
+    private static Logger logger = LoggerFactory.getLogger(JwtInvocationSecurityMetadataSourceService.class);
 
     /*
         key 是url+method ,value 是对应url资源的角色列表
@@ -36,8 +41,7 @@ public class JwtInvocationSecurityMetadataSourceService
     */
     private Map<RequestMatcher, Collection<ConfigAttribute>> relationMap = new LinkedHashMap<>();
 
-
-    @Autowired
+    @Resource
     private UserService userService;
 
     /**

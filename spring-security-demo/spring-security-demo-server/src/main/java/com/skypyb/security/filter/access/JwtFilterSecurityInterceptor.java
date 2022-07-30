@@ -2,7 +2,6 @@ package com.skypyb.security.filter.access;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.SecurityMetadataSource;
 import org.springframework.security.access.intercept.AbstractSecurityInterceptor;
 import org.springframework.security.access.intercept.InterceptorStatusToken;
@@ -10,7 +9,13 @@ import org.springframework.security.web.FilterInvocation;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.*;
+import javax.annotation.Resource;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import java.io.IOException;
 
 /**
@@ -21,12 +26,12 @@ import java.io.IOException;
 public class JwtFilterSecurityInterceptor extends AbstractSecurityInterceptor
         implements Filter {
 
-    private static Logger logger = LoggerFactory.getLogger("SECURITY");
+    private static Logger logger = LoggerFactory.getLogger(JwtFilterSecurityInterceptor.class);
 
-    @Autowired
+    @Resource
     private JwtAccessDecisionManager accessDecisionManager;
 
-    @Autowired
+    @Resource
     private JwtInvocationSecurityMetadataSourceService invocationSecurityMetadataSourceService;
 
     /**

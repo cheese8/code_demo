@@ -19,7 +19,6 @@ public class AuthenticationUser implements UserDetails {
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
-
     public static final AuthenticationUser from(MinimumUserDTO user) {
         AuthenticationUser authUser = new AuthenticationUser();
         authUser.setUserId(user.getUserId());
@@ -88,6 +87,5 @@ public class AuthenticationUser implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
 
 }

@@ -2,19 +2,20 @@ package com.skypyb.security.model.response;
 
 
 import com.skypyb.security.exception.RequestValidationException;
+import com.skypyb.security.util.Result;
 
 
 /**
  * 数据效验失败时返回的响应
  */
-public class ValidationFailResponse extends BasicResponse {
+public class ValidationFailResponse extends ResultResponse {
 
-    public ValidationFailResponse(int code, String message) {
-        super(code, message);
+    public ValidationFailResponse(Result result) {
+        super(result);
     }
 
     public static ValidationFailResponse from(RequestValidationException e) {
-        return new ValidationFailResponse(e.getCode(), e.getMessage());
+        return new ValidationFailResponse(new Result().custom(e.getCode(), e.getMessage()));
     }
 
 }

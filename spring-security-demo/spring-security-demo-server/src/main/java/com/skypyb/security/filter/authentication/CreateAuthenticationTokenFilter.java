@@ -6,14 +6,13 @@ import com.skypyb.security.model.request.AuthenticationRequest;
 import com.skypyb.security.model.response.AuthenticationFailResponse;
 import com.skypyb.security.model.response.AuthenticationResponse;
 import com.skypyb.security.util.JwtTokenUtil;
+import com.skypyb.security.util.ResponseUtil;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -39,7 +38,7 @@ import java.nio.charset.Charset;
  */
 public class CreateAuthenticationTokenFilter extends AbstractAuthenticationProcessingFilter {
 
-    private final Logger logger = LoggerFactory.getLogger("SECURITY");
+    private static final Logger logger = LoggerFactory.getLogger(CreateAuthenticationTokenFilter.class);
 
     private SecurityProperties properties;
 
@@ -52,7 +51,6 @@ public class CreateAuthenticationTokenFilter extends AbstractAuthenticationProce
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
-
     /**
      * 初始化方法,设置好成功的处理器和失败的处理器
      *
@@ -60,7 +58,7 @@ public class CreateAuthenticationTokenFilter extends AbstractAuthenticationProce
      */
     public CreateAuthenticationTokenFilter init() {
         //设置失败的Handler
-        this.setAuthenticationFailureHandler(new FailureHandler());
+        this.setAuthenticationFailureHandler(new AuthenticationFailedHandler());
 
         //设置成功的Handler
         this.setAuthenticationSuccessHandler(new SuccessHandler());
@@ -96,13 +94,11 @@ public class CreateAuthenticationTokenFilter extends AbstractAuthenticationProce
         return this.getAuthenticationManager().authenticate(authToken);
     }
 
-
     /**
      * 用户名和密码效验正确的处理器
      * 生成一个token
      */
     public class SuccessHandler implements AuthenticationSuccessHandler {
-
 
         @Override
         public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -127,19 +123,11 @@ public class CreateAuthenticationTokenFilter extends AbstractAuthenticationProce
         }
     }
 
-    /**
-     * 登陆失败了那就将这异常往外边传
-     */
-    public class FailureHandler implements AuthenticationFailureHandler {
+    public class AuthenticationFailedHandler implements AuthenticationFailureHandler {
 
         @Override
-        public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-                                            AuthenticationException exception) throws IOException, ServletException, AuthenticationException {
-            response.setContentType("application/json; charset=utf-8");
-            PrintWriter writer = response.getWriter();
-            writer.print(AuthenticationFailResponse.asResponse(exception).toJson());
-            writer.flush();
-            writer.close();
+        public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, AuthenticationException {
+            ResponseUtil.printAndFlush(response, AuthenticationFailResponse.asResponse(exception).toJson(), "application/json; charset=utf-8");
         }
     }
 

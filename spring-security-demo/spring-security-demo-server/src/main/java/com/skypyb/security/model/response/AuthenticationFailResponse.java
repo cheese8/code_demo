@@ -1,20 +1,16 @@
 package com.skypyb.security.model.response;
 
-
 import com.skypyb.security.exception.SecurityAuthException;
+import com.skypyb.security.util.Result;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 
-/**
- * 认证失败时返回给前台的响应
- */
-public class AuthenticationFailResponse extends BasicResponse {
+public class AuthenticationFailResponse extends ResultResponse {
 
-
-    public AuthenticationFailResponse(int code, String message) {
-        super(code, message);
+    public AuthenticationFailResponse(Result result) {
+        super(result);
     }
 
     public static AuthenticationFailResponse asResponse(AuthenticationException e) {
@@ -26,18 +22,14 @@ public class AuthenticationFailResponse extends BasicResponse {
 
         if (e instanceof SecurityAuthException) {
             SecurityAuthException ex = (SecurityAuthException) e;
-            unauthorized = new AuthenticationFailResponse(ex.getCode(), ex.getMessage());
-
+            unauthorized = new AuthenticationFailResponse(new Result().custom(ex.getCode(), ex.getMessage()));
         } else if (e instanceof DisabledException) {
-            unauthorized = new AuthenticationFailResponse(401, "User is disabled!");
-
+            unauthorized = new AuthenticationFailResponse(new Result().custom(401, "User is disabled!"));
         } else if (e instanceof BadCredentialsException) {
-            unauthorized = new AuthenticationFailResponse(401, "Wrong credentials!");
-
+            unauthorized = new AuthenticationFailResponse(new Result().custom(401, "Wrong credentials!"));
         } else {
-            unauthorized = new AuthenticationFailResponse(401, "Unauthorized");
+            unauthorized = new AuthenticationFailResponse(new Result().custom(401, "Unauthorized"));
         }
-
         return unauthorized;
     }
 

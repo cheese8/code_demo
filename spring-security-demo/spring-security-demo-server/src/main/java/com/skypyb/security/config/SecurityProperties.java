@@ -8,14 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-/**
- * 安全相关配置
- * 从 application.yml 文件里读取
- */
-@ConfigurationProperties(
-        prefix = "demo.security"
-)
+@ConfigurationProperties(prefix = "demo.security")
 @Component
 public class SecurityProperties {
 

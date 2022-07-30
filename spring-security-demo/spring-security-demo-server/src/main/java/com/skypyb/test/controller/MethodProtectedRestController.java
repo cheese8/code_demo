@@ -1,16 +1,23 @@
 package com.skypyb.test.controller;
 
+import com.skypyb.security.service.AuthenticationUserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 测试获取资源
  */
 @RestController
 public class MethodProtectedRestController {
+    
+    @Resource
+    private AuthenticationUserService authenticationUserService;
 
     /**
      * This is an example of some different kinds of granular restriction for endpoints. You can use the built-in SPEL expressions
@@ -47,6 +54,9 @@ public class MethodProtectedRestController {
     public ResponseEntity<?> testIgnorePost() {
         return ResponseEntity.ok("/ignore/testpost");
     }
-
-
+    
+    @RequestMapping(value = "/login",method = RequestMethod.POST)
+    public UserDTO authenticate(@RequestBody LoginDTO loginDTO, HttpServletResponse response) {
+        return authenticationUserService.loadUserByUsername();
+    }
 }

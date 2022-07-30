@@ -1,6 +1,5 @@
 package com.skypyb.security.filter.access;
 
-
 import com.skypyb.security.config.SecurityProperties;
 import com.skypyb.security.util.JwtTokenUtil;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -28,15 +27,13 @@ import java.io.IOException;
  */
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
-
-    private final Logger logger = LoggerFactory.getLogger("SECURITY");
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationTokenFilter.class);
 
     private UserDetailsService userDetailsService;
 
     private JwtTokenUtil jwtTokenUtil;
 
     private SecurityProperties properties;
-
 
     public JwtAuthenticationTokenFilter(SecurityProperties properties, JwtTokenUtil jwtTokenUtil, UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
@@ -54,7 +51,6 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
             return;
         }
-
 
         String username = null;
         try {
